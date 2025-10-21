@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOFF Wind Display</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      margin-top: 20px;
+      font-size: 2rem;
+    }
+    #runway {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 20px auto;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Offutt_AFB_runway_13-31.svg/800px-Offutt_AFB_runway_13-31.svg.png') center/contain no-repeat;
+    }
+    #arrow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 6px;
+      background: red;
+      border-radius: 3px;
+      transform-origin: left center;
+      transition: transform 1s ease;
+    }
+    #windtext {
+      margin-top: 15px;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Offutt AFB Wind</h2>
+  <div id="runway">
+    <div id="arrow"></div>
+  </div>
+  <p id="windtext">Loading...</p>
+
+  <script>
+    async function fetchWindData() {
+      try {
+        const response = await fetch('https://avwx.rest/api/metar/KOFF?token=-kvCtGlqhQvB6oYpJ9NfCkxL4OZgRx6r9Z8k7K01kP8');
+        const data = await response.json();
+        const wind = data.wind;
+
+        if (wind) {
+          const deg = wind.degrees || 0;
+          const spd = wind.speed_kts || 0;
+
+          document.getElementById('arrow').style.transform = `rotate(${deg}deg)`;
+          document.getElementById('windtext').innerText = `Wind ${deg}° @ ${spd} kt`;
+        } else {
+          throw new Error('Wind data not available');
+        }
+      } catch (error) {
+        document.getElementById('windtext').innerText = 'Error loading data';
+        console.error(error);
+      }
+    }
+
+    fetchWindData();
+    setInterval(fetchWindData, 300000); // Update every 5 minutes
+  </script>
+</body>
+</html>
